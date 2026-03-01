@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const analysisRoutes = require('./routes/analysis');
 const chatRoutes = require('./routes/chat');
+const contractRoutes = require('./routes/contracts');
+const legalResearchRoutes = require('./routes/legal-research');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +34,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/contracts', contractRoutes);
+app.use('/api/legal-research', legalResearchRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

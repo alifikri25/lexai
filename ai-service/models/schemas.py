@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 class ParseRequest(BaseModel):
@@ -55,3 +55,41 @@ class ExportRequest(BaseModel):
     summary: str
     clauses: List[dict]
     risk_score: int
+
+
+# ── Contract Drafting Schemas ────────────────────────────────────────
+
+class ContractDraftRequest(BaseModel):
+    template_id: str
+    form_data: Dict[str, str]
+
+
+class ContractDraftResponse(BaseModel):
+    template_id: str
+    template_name: str
+    draft_content: str
+    form_data: Dict[str, str]
+
+
+class ContractExportRequest(BaseModel):
+    title: str
+    content: str
+    format: str  # "pdf" or "docx"
+
+
+# ── Legal Research Schemas ───────────────────────────────────────────
+
+class LegalResearchRequest(BaseModel):
+    message: str
+    chat_history: Optional[List[dict]] = []
+
+
+class ReferenceItem(BaseModel):
+    title: str
+    source: str
+    url: str
+
+
+class LegalResearchResponse(BaseModel):
+    response: str
+    references: Optional[List[ReferenceItem]] = []

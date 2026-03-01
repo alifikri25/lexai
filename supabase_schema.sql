@@ -49,13 +49,37 @@ CREATE TABLE IF NOT EXISTS document_chunks (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Step 6: Enable Row Level Security
+-- Step 6: Create contract_drafts table (for Contract Drafting feature)
+CREATE TABLE IF NOT EXISTS contract_drafts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  template_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  draft_content TEXT,
+  form_data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Step 7: Create legal_research_messages table (for Legal Research feature)
+CREATE TABLE IF NOT EXISTS legal_research_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  legal_refs JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Step 8: Enable Row Level Security
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_chunks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contract_drafts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE legal_research_messages ENABLE ROW LEVEL SECURITY;
 
--- Step 7: Create RLS Policies
+-- Step 9: Create RLS Policies
 CREATE POLICY "Users can CRUD own documents"
   ON documents FOR ALL USING (auth.uid() = user_id);
 
@@ -72,8 +96,16 @@ CREATE POLICY "Users can read own chunks"
     document_id IN (SELECT id FROM documents WHERE user_id = auth.uid())
   );
 
--- Step 8: Create indexes for performance
+CREATE POLICY "Users can CRUD own contract drafts"
+  ON contract_drafts FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can CRUD own legal research messages"
+  ON legal_research_messages FOR ALL USING (auth.uid() = user_id);
+
+-- Step 10: Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_analyses_document_id ON analyses(document_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_document_id ON chat_messages(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_chunks_document_id ON document_chunks(document_id);
+CREATE INDEX IF NOT EXISTS idx_contract_drafts_user_id ON contract_drafts(user_id);
+CREATE INDEX IF NOT EXISTS idx_legal_research_messages_user_id ON legal_research_messages(user_id);
